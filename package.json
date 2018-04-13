@@ -1,0 +1,19 @@
+{
+  "name": "espruino-emulator",
+  "version": "0.1.0",
+  "description": "Espruino emulator. Intended to help in espruino app development",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfgea/espruino-emulator.git"
+  },
+  "author": "Matias Gea <matigea@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mfgea/espruino-emulator/issues"
+  },
+  "homepage": "https://github.com/mfgea/espruino-emulator#readme"
+}
