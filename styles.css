@@ -1,0 +1,48 @@
+row {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+}
+
+column {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    margin: 0 10px;
+}
+
+.statusColumn label {
+    margin: 3px 0;
+}
+
+.numberInput {
+    width: 4em;
+    text-align: right;
+}
+
+.rotary_encoder {
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin: 10px;
+    display: inline-block;
+}
+
+.rotary_encoder label {
+    display: block;
+}
+
+.heaterSwitch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+.heaterSwitch.on {
+    background: greenyellow;
+}
+
+.heaterSwitch.off {
+    background: gray;
+}

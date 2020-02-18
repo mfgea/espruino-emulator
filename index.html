@@ -5,12 +5,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Page Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="styles.css" >
 </head>
 <body>
-    <div id="screen" style="float: left"></div>
-    <button onclick="fakeEncoder.down()">Rotary -</button>
-    <button onclick="fakeEncoder.click()">Rotary Click</button>
-    <button onclick="fakeEncoder.up()">Rotary +</button>
+    <row>
+        <column>
+            <div id="screen"></div>
+
+            <div class="rotary_encoder">
+                <label>Rotary</label>
+                <button onclick="fakeEncoder.down()">-</button>
+                <button onclick="fakeEncoder.click()">X</button>
+                <button onclick="fakeEncoder.up()">+</button>
+            </div>
+        </column>
+
+        <column class="statusColumn">
+            <label>
+                <input class="numberInput" type="number" id="tempInput" value="20"> Curr. Temp.
+            </label>
+            <label>
+                <input class="numberInput" id="humInput" type="number" value="69.5"> Curr. Hum.
+            </label>
+            <label>
+                <div id="heaterRelay" class="heaterSwitch off"></div> Relay
+            </label>
+            <label>
+                <input type="checkbox" onchange="fakeHeater.changeState(event)"> Heater State
+            </label>
+        </column>
+    </row>
 
     <!-- Lodash, used by the espruino emu -->
     <script src="lodash.min.js"></script>
@@ -18,32 +42,42 @@
     <!-- Espruino native components -->
     <script src="components/graphics-class.js"></script>
     <script src="components/i2c.js"></script>
+    <script src="components/wifi.js"></script>
+    <script src="components/http.js"></script>
 
     <!-- Add mocked components here -->
     <script src="mocked-components/i2c-ssd1306.js"></script>
     <script src="mocked-components/rotary-encoder.js"></script>
+    <script src="mocked-components/heater.js"></script>
 
     <!-- Static files (saved in flash memory using 'Storage' API) -->
-    <script src="app/static_files.js"></script>
+    <script src="app/dist/static_files.js"></script>
 
     <!-- Main Espruino emulator -->
     <script src="espruino_emu.js"></script>
 
     <!-- This is the app script -->
-    <script src="app/bundle.js"></script>
+    <script src="app/dist/bundle.js"></script>
+    <script src="mocked-components/dht22.js"></script>
 
     <script>
         // Instantiate the mocked components
         const fakeSsd1306 = new I2CSSD1306('screen', 128, 64);
-        //const fakeEncoder = new RotaryEncoder(NodeMCU.D5, NodeMCU.D6, NodeMCU.D7);
+        const fakeEncoder = new RotaryEncoder(NodeMCU.D5, NodeMCU.D6, NodeMCU.D7);
+        const fakeHeater = new FakeHeater(15, 16, 'heaterRelay');
+        FakeDHT22.attach("tempInput", "humInput");
 
         // Attach a mocked component to the I2C bus
         I2C.attach(0x3C, fakeSsd1306);
 
         // Attach inputs to the pins
-        //E.attachInput(NodeMCU.D5, fakeEncoder, 'up');
-        //E.attachInput(NodeMCU.D6, fakeEncoder, 'down');
-        //E.attachInput(NodeMCU.D7, fakeEncoder, 'click');
+        E.attachInput(NodeMCU.D5, fakeEncoder, 'up');
+        E.attachInput(NodeMCU.D6, fakeEncoder, 'down');
+        E.attachInput(NodeMCU.D7, fakeEncoder, 'click');
+
+        E.attachInput(15, fakeHeater); // switch pin
+        E.attachInput(16, fakeHeater); // state pin
+
 
         // Power on the emulated device
         E.powerOn();

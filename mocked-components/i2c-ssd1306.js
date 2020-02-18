@@ -5,6 +5,7 @@ class I2CSSD1306 {
 
         this.container.appendChild(this.canvas);
         this.canvas.style.imageRendering = "pixelated";
+        this.canvas.style.zoom = 2;
         this.canvas.width = width;
         this.canvas.height = height;
 

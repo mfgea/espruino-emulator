@@ -28,7 +28,20 @@ class EspruinoClass {
     setWatch(cb, pin, options) {
         const pinAttach = this.attachedPins[pin];
         if(pinAttach && pinAttach.type == 'input') {
-            pinAttach.ctrl.on(pinAttach.event, cb);
+            const watchRef = pinAttach.ctrl.on(pinAttach.event, cb);
+            return {
+                pin,
+                event: pinAttach.event,
+                watchRef
+            }
+        }
+    }
+
+    clearWatch(ref) {
+        if(ref) {
+            const { pin, event, watchRef } = ref;
+            const pinAttach = this.attachedPins[pin];
+            pinAttach.ctrl.removeEvent(watchRef);
         }
     }
 
@@ -42,8 +55,8 @@ class EspruinoClass {
 
     writePin(pin, value) {
         const pinCtrl = this.attachedPins[pin];
-        if(pinCtrl && pinCtrl.writeValue) {
-            pinCtrl.writeValue(pin, value);
+        if(pinCtrl && pinCtrl.ctrl && pinCtrl.ctrl.writeValue) {
+            pinCtrl.ctrl.writeValue(pin, value);
         }
     }
 
@@ -72,7 +85,10 @@ function digitalWrite(pin, value) {
     E.writePin(pin, value);
 }
 function setWatch(cb, pin, options) {
-    E.setWatch(cb, pin, options);
+    return E.setWatch(cb, pin, options);
+}
+function clearWatch(ref) {
+    E.clearWatch(ref);
 }
 
 /**
@@ -99,7 +115,9 @@ class Storage {
 }
 
 const modules = {
-    Storage: new Storage()
+    Storage: new Storage(),
+    Wifi,
+    http,
 }
 
 function require(module) {
@@ -110,11 +128,21 @@ Object.prototype.on = function(event, cb) {
     this.events = this.events || {};
     const evts = _.get(this, 'events.' + event, []);
     evts.push(cb);
+    const index = evts.length - 1;
+    this.events[event] = evts;
+    return { event, index };
+}
+
+Object.prototype.removeEvent = function(ref) {
+    const { event, index } = ref;
+    this.events = this.events || {};
+    const evts = _.get(this, 'events.' + event, []);
+    evts.splice(index, 1);
     this.events[event] = evts;
 }
 
-Object.prototype.emit = function(event) {
-    _.get(this, 'events.' + event, []).forEach(cb => cb());
+Object.prototype.emit = function(event, ...args) {
+    _.get(this, 'events.' + event, []).forEach(cb => cb.apply(this, args));
 }
 
 const font4x6 = atob('AA6AAwAwA+U+Aa/WAmIyA2+KAAwAAciAAAicAYwYAEOEABCAAEEEAACAAGIwAcicAS+CAmqSAiqUAck+A6qkAcqkAgm4AUqUAQqcAAKAABKAAEKAAKKKAAKEAgqQAcqaAekeA+qUAciUA+icA+qiA+ogAciuA+I+Ai+iAEC8A+YmA+CCA+e+A+c+AcicA+kYAcmeA+kaASqkAg+gA+C+A8G8A+M+A2I2A4O4AmqyA+iiAwIGAii+AQgQACCCAgQAAWWOA+SMAMSSAMS+AMaKAIeoAJVeA+QOAKuCAJuAA+IWAi+CAeeOAeQOAMSMAfSMAMSfAeIQAKaUAQ8SAcCeAcGcAeOeAWIWAZFeAWaSAI+iAA+AAi+IAQwgA///');
